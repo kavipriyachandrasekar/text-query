@@ -8,7 +8,14 @@ warnings.filterwarnings("ignore")
 # words = input()
 
 # Load a pre-trained spaCy model
-nlp = spacy.load("en_core_web_md")
+try:
+    nlp = spacy.load("en_core_web_md")
+except OSError:
+    print('Downloading language model for the spaCy POS tagger\n'
+        "(don't worry, this will only happen once)")
+    from spacy.cli import download
+    download("en_core_web_md")
+    nlp = spacy.load("en_core_web_md")
 
 # Define a list of POS tags that correspond to "content" words
 content_tags = ["ADJ", "NOUN", "VERB", "ADV"]
@@ -60,7 +67,7 @@ app = Flask(__name__)
 def api():
     # get the query from the url sentence
     sentence = request.args.get('sentence')
-    # assert sentence == str(sentence)
+    assert sentence == str(sentence)
 
     if sentence == None or len(sentence) == 0:
         return "Send query param ?sentence="
@@ -69,7 +76,22 @@ def api():
     tags = get_tags(sentence)
     # return the tags as json
     return jsonify(tags)
-    
+
+@app.route('/noob', methods=['GET'])
+@cross_origin()
+def test():
+    # get the query from the url sentence
+    sentence = request.args.get('sentence')
+    assert sentence == str(sentence)
+
+    # assert sentence == str(sentence)
+
+    if sentence == None or len(sentence) == 0:
+        return "Send query param ?sentence="
+
+    print(type(sentence))
+    return "mysteries to the universe"
+
 
 if __name__ == '__main__':
     app.run(debug=True)
