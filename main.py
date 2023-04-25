@@ -1,6 +1,5 @@
 import spacy
-from flask import Flask, jsonify, request
-from flask_cors import CORS, cross_origin
+import gradio as gr
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -8,14 +7,15 @@ warnings.filterwarnings("ignore")
 # words = input()
 
 # Load a pre-trained spaCy model
+model_name = "en_core_web_lg"
 try:
-    nlp = spacy.load("en_core_web_md")
+    nlp = spacy.load(model_name)
 except OSError:
     print('Downloading language model for the spaCy POS tagger\n'
         "(don't worry, this will only happen once)")
     from spacy.cli import download
-    download("en_core_web_md")
-    nlp = spacy.load("en_core_web_md")
+    download(model_name)
+    nlp = spacy.load(model_name)
 
 # Define a list of POS tags that correspond to "content" words
 content_tags = ["ADJ", "NOUN", "VERB", "ADV"]
@@ -36,7 +36,7 @@ def extract_keywords(sentence):
     # Return the list of keywords
     return keywords
 
-def get_tags(sentence):
+def get_tags(sentence, similarity_index=0.4):
     # load tags.json and import the object into a dictionary
     # songs = json.load(codecs.open('tags.json', 'r', 'utf-8-sig'))
 
@@ -53,45 +53,20 @@ def get_tags(sentence):
     tags = []
     for tag in keywords:
         for token in tokens:
-            if nlp(tag).similarity(token) >= 0.8:
+            if nlp(tag).similarity(token) >= similarity_index:
                 if token.text not in tags:
                     tags.append(token.text)
                     # print(tag, token.text, nlp(tag).similarity(token))
+
     return tags
 
 
-app = Flask(__name__)
-
-@app.route('/', methods=['GET'])
-@cross_origin()
-def api():
-    # get the query from the url sentence
-    sentence = request.args.get('sentence')
-    assert sentence == str(sentence)
-
+def api(sentence):
     if sentence == None or len(sentence) == 0:
         return "Send query param ?sentence="
-
-    # get the tags from the sentence
+    assert sentence == str(sentence)
     tags = get_tags(sentence)
-    # return the tags as json
-    return jsonify(tags)
+    print(tags)
+    return ', '.join(tags)
 
-@app.route('/noob', methods=['GET'])
-@cross_origin()
-def test():
-    # get the query from the url sentence
-    sentence = request.args.get('sentence')
-    assert sentence == str(sentence)
-
-    # assert sentence == str(sentence)
-
-    if sentence == None or len(sentence) == 0:
-        return "Send query param ?sentence="
-
-    print(type(sentence))
-    return "mysteries to the universe"
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+gr.Interface(fn=api, inputs="text", outputs="text").launch()
