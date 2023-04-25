@@ -69,21 +69,4 @@ def api(sentence):
     print(tags)
     return ', '.join(tags)
 
-@app.route('/noob', methods=['GET'])
-@cross_origin()
-def test():
-    # get the query from the url sentence
-    sentence = request.args.get('sentence')
-    assert sentence == str(sentence)
-
-    # assert sentence == str(sentence)
-
-    if sentence == None or len(sentence) == 0:
-        return "Send query param ?sentence="
-
-    print(type(sentence))
-    return "mysteries to the universe"
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+gr.Interface(fn=api, inputs="text", outputs="text").launch()
