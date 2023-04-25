@@ -1,6 +1,5 @@
 import spacy
-from flask import Flask, jsonify, request
-from flask_cors import CORS, cross_origin
+import gradio as gr
 
 import warnings
 warnings.filterwarnings("ignore")
