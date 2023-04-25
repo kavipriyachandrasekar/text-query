@@ -7,14 +7,15 @@ warnings.filterwarnings("ignore")
 # words = input()
 
 # Load a pre-trained spaCy model
+model_name = "en_core_web_lg"
 try:
-    nlp = spacy.load("en_core_web_md")
+    nlp = spacy.load(model_name)
 except OSError:
     print('Downloading language model for the spaCy POS tagger\n'
         "(don't worry, this will only happen once)")
     from spacy.cli import download
-    download("en_core_web_md")
-    nlp = spacy.load("en_core_web_md")
+    download(model_name)
+    nlp = spacy.load(model_name)
 
 # Define a list of POS tags that correspond to "content" words
 content_tags = ["ADJ", "NOUN", "VERB", "ADV"]
