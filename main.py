@@ -1,5 +1,6 @@
 import spacy
-import gradio as gr
+from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -7,7 +8,7 @@ warnings.filterwarnings("ignore")
 # words = input()
 
 # Load a pre-trained spaCy model
-model_name = "en_core_web_lg"
+model_name = "en_core_web_md"
 try:
     nlp = spacy.load(model_name)
 except OSError:
@@ -60,12 +61,38 @@ def get_tags(sentence, similarity_index=0.4):
     return list(set(tags))
 
 
-def api(sentence):
+app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+@cross_origin()
+def api():
+    # get the query from the url sentence
+    sentence = request.args.get('sentence')
+    assert sentence == str(sentence)
+
     if sentence == None or len(sentence) == 0:
         return "Send query param ?sentence="
-    assert sentence == str(sentence)
-    tags = get_tags(sentence)
-    print(tags)
-    return ', '.join(tags)
 
-gr.Interface(fn=api, inputs="text", outputs="text").launch()
+    # get the tags from the sentence
+    tags = get_tags(sentence)
+    # return the tags as json
+    return jsonify(tags)
+
+@app.route('/noob', methods=['GET'])
+@cross_origin()
+def test():
+    # get the query from the url sentence
+    sentence = request.args.get('sentence')
+    assert sentence == str(sentence)
+
+    # assert sentence == str(sentence)
+
+    if sentence == None or len(sentence) == 0:
+        return "Send query param ?sentence="
+
+    print(type(sentence))
+    return "mysteries to the universe"
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
